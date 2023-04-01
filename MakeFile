@@ -1,45 +1,16 @@
+# Makefile
 
-#
-LIBNAME =time
-LIBSUFFIX =.dll
+LUA_VERSION = 5.1
+LUA_INCLUDE = /opt/homebrew/Cellar/lua/5.1.5_8/include/lua-5.1
+LUA_LIBDIR = /opt/homebrew/Cellar/lua/5.1.5_8/lib
 
-# common prefix 
-INCDIR =C:\dev\dev-cpp\include
-LUAPREFIX =C:\dev\Luajit
+CFLAGS = -Wall -Wextra -fPIC -I$(LUA_INCLUDE)
+LDFLAGS = -shared -L$(LUA_LIBDIR) -llua$(LUA_VERSION)
 
-# LuaJIT2
-LUAINC =$(LUAPREFIX)\src
-LUALIB =$(LUAPREFIX)\src
-LLIB = lua51
+all: time.so
 
-# basic setup
-CC =gcc
-WARN =-Wall
-INCS =-I$(INCDIR) -I$(LUAINC)
-LIBS =-L$(LUALIB) -lm -l$(LLIB) 
-OPTS =-O9
-DLL =-c
-SHARE =-shared
-CFLAGS =$(DLL) $(OPTS) -I$(LUAINC)
-CFLAGS_DLL =$(SHARE) $(OPTS) $(LIBS) $(INCS)
+time.so: time.c
+	gcc $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-# Strip the binary for our prod build
-STRIP =strip
-
-# UPX pack to minimise size for our prod build
-UPX =upx
-UPXFLAG =-9
-
-# 
-$(LIBNAME)$(LIBSUFFIX): $(LIBNAME).o
-	$(CC) -o $@ $^ $(CFLAGS_DLL)
-
-$(LIBNAME).o: $(LIBNAME).c
-	$(CC) -o $@ $^ $(CFLAGS)
-
-release: $(LIBNAME)$(LIBSUFFIX)
-	$(STRIP) $<
-	$(UPX) $(UPXFLAG) $<
-	
 clean:
-	rm *.o *.dll
+	rm -f time.so
